@@ -62,8 +62,13 @@ card_mod:
     {% set o0 = o[0] %}{% set o1 = o[1] %}
 
 
+<<<<<<< HEAD
     {% set left_logo  = state_attr('sensor.detriot_lions','team_logo') %} {% set
     right_logo = state_attr('sensor.detriot_lions','opponent_logo') %}
+=======
+    {% set left_logo  = state_attr('sensor.detriot_lions','team_logo') %}
+    {% set right_logo = state_attr('sensor.detriot_lions','opponent_logo') %}
+>>>>>>> 826f49e47e31ef368ead3febd504a277a6d511e3
 
     {% set is_live = (states('sensor.detriot_lions') == 'IN') %}
 
