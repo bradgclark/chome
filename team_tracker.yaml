@@ -1,0 +1,130 @@
+type: custom:mushroom-template-card
+entity: sensor.detriot_lions
+fill_container: true
+icon: mdi:football
+grid_options:
+  columns: full
+primary: >
+  {% set team = state_attr(entity,'team_name') %} {% set team_record =
+  state_attr(entity,'team_record') %} {% set opp =
+  state_attr(entity,'opponent_name') %} {% set opp_record =
+  state_attr(entity,'opponent_record') %} {{ team }} ({{ team_record }}) @ {{
+  opp }} ({{ opp_record }})
+multiline_primary: true
+secondary: >
+  {% set s = states(entity) %} {% set q = (state_attr(entity,'quarter')|int(0))
+  %} {% set clock = state_attr(entity,'clock') %} {% set det =
+  state_attr(entity,'team_abbr') %} {% set opp =
+  state_attr(entity,'opponent_abbr') %} {% set det_score =
+  state_attr(entity,'team_score') %} {% set opp_score =
+  state_attr(entity,'opponent_score') %} {% set odds = state_attr(entity,'odds')
+  %} {% set net = state_attr(entity,'tv_network') %} {% set kickoff =
+  (state_attr(entity,'date') | as_datetime | as_local) %} {% set poss =
+  (state_attr(entity,'possession') or '') | string | upper %} {% set det_poss =
+  (poss == det|string|upper) %} {% set opp_poss = (poss == opp|string|upper) %}
+  {% set det_ball = ' • ●' if det_poss else '' %} {% set opp_ball = ' • ●' if
+  opp_poss else '' %} {% set team_won = state_attr(entity,'team_winner') %} {%
+  set opp_won = state_attr(entity,'opponent_winner') %}
+
+  {% if s == 'IN' %}
+    LIVE • Q{{ q if q>0 else '?' }} {{ clock if clock else '' }} •
+    {{ det }} {{ det_score }}{{ det_ball }} – {{ opp_score }} {{ opp }}{{ opp_ball }}
+  {% elif s == 'POST' %}
+    FINAL •
+    {% if team_won in [true, 'true'] %}🏆 {{ det }} {{ det_score }}{% else %}{{ det }} {{ det_score }}{% endif %} –
+    {% if opp_won in [true, 'true'] %}🏆 {{ opp }} {{ opp_score }}{% else %}{{ opp }} {{ opp_score }}{% endif %}
+  {% else %}
+    {{ kickoff.strftime('%a %b %-d, %-I:%M %p') }} • {{ net if net else 'TV TBA' }}{% if odds %} • Odds: {{ odds }}{% endif %}
+  {% endif %}
+multiline_secondary: true
+badge_icon: >
+  {% set s = states(entity) %} {% if s == 'IN' %}mdi:flash {% elif s == 'POST'
+  %}mdi:flag-checkered {% else %}mdi:clock-outline {% endif %}
+badge_color: >
+  {% set s = states(entity) %} {% if s == 'IN' %}red {% elif s == 'POST' %}green
+  {% else %}blue {% endif %}
+icon_color: >
+  {% set s = states(entity) %} {% if s == 'IN' %}amber {% elif s == 'POST'
+  %}grey {% else %}teal {% endif %}
+tap_action:
+  action: url
+  url_path: "{{ state_attr(entity, 'event_url') or state_attr(entity, 'team_url') }}"
+card_mod:
+  style: >
+    {% set t = state_attr('sensor.detriot_lions','team_colors') or
+    ['#0076b6','#bbbbbb'] %}
+
+    {% set o = state_attr('sensor.detriot_lions','opponent_colors') or
+    ['#e31837','#ffb612'] %}
+
+    {% set t0 = t[0] %}{% set t1 = t[1] %}
+
+    {% set o0 = o[0] %}{% set o1 = o[1] %}
+
+
+    {% set left_logo  = state_attr('sensor.detriot_lions','team_logo')
+                         or 'https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/det.png' %}
+    {% set right_logo = state_attr('sensor.detriot_lions','opponent_logo')
+                         or 'https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/kc.png' %}
+
+    {% set is_live = (states('sensor.detriot_lions') == 'IN') %}
+
+
+    ha-card {
+      width: 100%;
+      --mush-card-primary-font-weight: 700;
+      --mush-card-primary-font-size: 1.2rem;
+      --mush-card-secondary-font-size: 0.95rem;
+      --mush-spacing: 14px;
+      padding: 16px 16px 14px 16px;
+      position: relative;
+
+      background:
+        url("{{ left_logo }}") left 16px center / 28% auto no-repeat,
+        url("{{ right_logo }}") right 16px center / 28% auto no-repeat,
+        linear-gradient(90deg, {{ t0 }} 0%, {{ t1 }} 28%, {{ o1 }} 72%, {{ o0 }} 100%);
+      color: white;
+
+      border: 0;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+
+    ha-card::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.40);
+      border-radius: 16px;
+      pointer-events: none;
+    }
+
+
+    ha-card::after {
+      content: "LIVE";
+      position: absolute; top: 0; left: 0; right: 0;
+      height: {{ '4px' if is_live else '0' }};
+      background: linear-gradient(90deg, rgba(255,0,0,0.9), rgba(255,0,0,0.6), rgba(255,0,0,0.9));
+      box-shadow: 0 0 8px rgba(255,0,0,0.6);
+      text-indent: -9999px;
+      transition: height 160ms ease-in-out;
+      animation: {{ 'livePulse 1.6s ease-in-out infinite' if is_live else 'none' }};
+      pointer-events: none;
+    }
+
+    @keyframes livePulse {
+      0%,100% { box-shadow: 0 0 6px rgba(255,0,0,0.55); }
+      50%     { box-shadow: 0 0 14px rgba(255,0,0,0.85); }
+    }
+
+
+    ha-card > * { position: relative; }
+
+    :host { --mush-badge-size: 28px; }
+
+
+    .primary, .secondary {
+      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+      line-height: 1.25;
+    }
