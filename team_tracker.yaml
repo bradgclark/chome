@@ -15,23 +15,23 @@ secondary: >
   {% set s = states(entity) %} {% set q = (state_attr(entity,'quarter')|int(0))
   %} {% set clock = state_attr(entity,'clock') %} {% set det =
   state_attr(entity,'team_abbr') %} {% set opp =
-  state_attr(entity,'opponent_abbr') %} {% set det_score =
+  state_attr(entity,'opponent_abbr') %} {% set home_score =
   state_attr(entity,'team_score') %} {% set opp_score =
   state_attr(entity,'opponent_score') %} {% set odds = state_attr(entity,'odds')
   %} {% set net = state_attr(entity,'tv_network') %} {% set kickoff =
   (state_attr(entity,'date') | as_datetime | as_local) %} {% set poss =
-  (state_attr(entity,'possession') or '') | string | upper %} {% set det_poss =
+  (state_attr(entity,'possession') or '') | string | upper %} {% set home_poss =
   (poss == det|string|upper) %} {% set opp_poss = (poss == opp|string|upper) %}
-  {% set det_ball = ' • ●' if det_poss else '' %} {% set opp_ball = ' • ●' if
+  {% set home_ball = ' • ●' if home_poss else '' %} {% set opp_ball = ' • ●' if
   opp_poss else '' %} {% set team_won = state_attr(entity,'team_winner') %} {%
   set opp_won = state_attr(entity,'opponent_winner') %}
 
   {% if s == 'IN' %}
     LIVE • Q{{ q if q>0 else '?' }} {{ clock if clock else '' }} •
-    {{ det }} {{ det_score }}{{ det_ball }} – {{ opp_score }} {{ opp }}{{ opp_ball }}
+    {{ det }} {{ home_score }}{{ home_ball }} – {{ opp_score }} {{ opp }}{{ opp_ball }}
   {% elif s == 'POST' %}
     FINAL •
-    {% if team_won in [true, 'true'] %}🏆 {{ det }} {{ det_score }}{% else %}{{ det }} {{ det_score }}{% endif %} –
+    {% if team_won in [true, 'true'] %}🏆 {{ det }} {{ home_score }}{% else %}{{ det }} {{ home_score }}{% endif %} –
     {% if opp_won in [true, 'true'] %}🏆 {{ opp }} {{ opp_score }}{% else %}{{ opp }} {{ opp_score }}{% endif %}
   {% else %}
     {{ kickoff.strftime('%a %b %-d, %-I:%M %p') }} • {{ net if net else 'TV TBA' }}{% if odds %} • Odds: {{ odds }}{% endif %}
@@ -62,10 +62,8 @@ card_mod:
     {% set o0 = o[0] %}{% set o1 = o[1] %}
 
 
-    {% set left_logo  = state_attr('sensor.detriot_lions','team_logo')
-                         or 'https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/det.png' %}
-    {% set right_logo = state_attr('sensor.detriot_lions','opponent_logo')
-                         or 'https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/kc.png' %}
+    {% set left_logo  = state_attr('sensor.detriot_lions','team_logo') %} {% set
+    right_logo = state_attr('sensor.detriot_lions','opponent_logo') %}
 
     {% set is_live = (states('sensor.detriot_lions') == 'IN') %}
 
