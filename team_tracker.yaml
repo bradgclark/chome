@@ -4,74 +4,95 @@ fill_container: true
 icon: mdi:football
 grid_options:
   columns: full
+
 primary: >
-  {% set team = state_attr(entity,'team_name') %} {% set team_record =
-  state_attr(entity,'team_record') %} {% set opp =
-  state_attr(entity,'opponent_name') %} {% set opp_record =
-  state_attr(entity,'opponent_record') %} {{ team }} ({{ team_record }}) @ {{
-  opp }} ({{ opp_record }})
+  {% set team = state_attr(entity,'team_name') %}
+  {% set team_record = state_attr(entity,'team_record') %}
+  {% set opp = state_attr(entity,'opponent_name') %}
+  {% set opp_record = state_attr(entity,'opponent_record') %}
+  {{ team }} ({{ team_record }}) @ {{ opp }} ({{ opp_record }})
+
 multiline_primary: true
+
 secondary: >
-  {% set s = states(entity) %} {% set q = (state_attr(entity,'quarter')|int(0))
-  %} {% set clock = state_attr(entity,'clock') %} {% set det =
-  state_attr(entity,'team_abbr') %} {% set opp =
-  state_attr(entity,'opponent_abbr') %} {% set home_score =
-  state_attr(entity,'team_score') %} {% set opp_score =
-  state_attr(entity,'opponent_score') %} {% set odds = state_attr(entity,'odds')
-  %} {% set net = state_attr(entity,'tv_network') %} {% set kickoff =
-  (state_attr(entity,'date') | as_datetime | as_local) %} {% set poss =
-  (state_attr(entity,'possession') or '') | string | upper %} {% set home_poss =
-  (poss == det|string|upper) %} {% set opp_poss = (poss == opp|string|upper) %}
-  {% set home_ball = ' • ●' if home_poss else '' %} {% set opp_ball = ' • ●' if
-  opp_poss else '' %} {% set team_won = state_attr(entity,'team_winner') %} {%
-  set opp_won = state_attr(entity,'opponent_winner') %}
+  {% set s = states(entity) %}
+  {% set q = (state_attr(entity,'quarter')|int(0)) %}
+  {% set clock = state_attr(entity,'clock') %}
+  {% set home = state_attr(entity,'team_abbr') %}
+  {% set opp = state_attr(entity,'opponent_abbr') %}
+  {% set home_score = state_attr(entity,'team_score') %}
+  {% set opp_score = state_attr(entity,'opponent_score') %}
+  {% set odds = state_attr(entity,'odds') %}
+  {% set net = state_attr(entity,'tv_network') %}
+  {% set kickoff = (state_attr(entity,'date') | as_datetime | as_local) %}
+  {% set poss = (state_attr(entity,'possession') or '') | string | upper %}
+  {% set home_poss = (poss == home|string|upper) %}
+  {% set opp_poss = (poss == opp|string|upper) %}
+  {% set home_ball = ' • ●' if home_poss else '' %}
+  {% set opp_ball = ' • ●' if opp_poss else '' %}
+  {% set team_won = state_attr(entity,'team_winner') %}
+  {% set opp_won = state_attr(entity,'opponent_winner') %}
 
   {% if s == 'IN' %}
     LIVE • Q{{ q if q>0 else '?' }} {{ clock if clock else '' }} •
-    {{ det }} {{ home_score }}{{ home_ball }} – {{ opp_score }} {{ opp }}{{ opp_ball }}
+    {{ home }} {{ home_score }}{{ home_ball }} – {{ opp_score }} {{ opp }}{{ opp_ball }}
   {% elif s == 'POST' %}
     FINAL •
-    {% if team_won in [true, 'true'] %}🏆 {{ det }} {{ home_score }}{% else %}{{ det }} {{ home_score }}{% endif %} –
+    {% if team_won in [true, 'true'] %}🏆 {{ home }} {{ home_score }}{% else %}{{ home }} {{ home_score }}{% endif %} –
     {% if opp_won in [true, 'true'] %}🏆 {{ opp }} {{ opp_score }}{% else %}{{ opp }} {{ opp_score }}{% endif %}
   {% else %}
     {{ kickoff.strftime('%a %b %-d, %-I:%M %p') }} • {{ net if net else 'TV TBA' }}{% if odds %} • Odds: {{ odds }}{% endif %}
   {% endif %}
+
 multiline_secondary: true
+
 badge_icon: >
-  {% set s = states(entity) %} {% if s == 'IN' %}mdi:flash {% elif s == 'POST'
-  %}mdi:flag-checkered {% else %}mdi:clock-outline {% endif %}
+  {% set s = states(entity) %}
+  {% if s == 'IN' %}mdi:flash
+  {% elif s == 'POST' %}mdi:flag-checkered
+  {% else %}mdi:clock-outline
+  {% endif %}
+
 badge_color: >
-  {% set s = states(entity) %} {% if s == 'IN' %}red {% elif s == 'POST' %}green
-  {% else %}blue {% endif %}
+  {% set s = states(entity) %}
+  {% if s == 'IN' %}red
+  {% elif s == 'POST' %}green
+  {% else %}blue
+  {% endif %}
+
 icon_color: >
-  {% set s = states(entity) %} {% if s == 'IN' %}amber {% elif s == 'POST'
-  %}grey {% else %}teal {% endif %}
+  {% set s = states(entity) %}
+  {% if s == 'IN' %}amber
+  {% elif s == 'POST' %}grey
+  {% else %}teal
+  {% endif %}
+
 tap_action:
   action: url
   url_path: "{{ state_attr(entity, 'event_url') or state_attr(entity, 'team_url') }}"
+
 card_mod:
   style: >
-    {% set t = state_attr('sensor.detriot_lions','team_colors') or
-    ['#0076b6','#bbbbbb'] %}
+    {# Get the actual entity id from card config (reliable inside card-mod) #}
+    {% set e = config.entity or entity %}
 
-    {% set o = state_attr('sensor.detriot_lions','opponent_colors') or
-    ['#e31837','#ffb612'] %}
+    {# Colors: allow list or comma-separated string; provide safe fallbacks #}
+    {% set t_raw = state_attr(e,'team_colors') %}
+    {% set o_raw = state_attr(e,'opponent_colors') %}
 
-    {% set t0 = t[0] %}{% set t1 = t[1] %}
+    {% set t = t_raw if t_raw is iterable and (t_raw is not string) else (t_raw|default('')|string).split(',') %}
+    {% set o = o_raw if o_raw is iterable and (o_raw is not string) else (o_raw|default('')|string).split(',') %}
 
-    {% set o0 = o[0] %}{% set o1 = o[1] %}
+    {% set t0 = (t[0]|trim if t|length > 0 and t[0] else '#0076b6') %}
+    {% set t1 = (t[1]|trim if t|length > 1 and t[1] else '#bbbbbb') %}
+    {% set o0 = (o[0]|trim if o|length > 0 and o[0] else '#e31837') %}
+    {% set o1 = (o[1]|trim if o|length > 1 and o[1] else '#ffb612') %}
 
+    {# Logos with fallbacks #}
+    {% set left_logo  = state_attr(e,'team_logo') or '' %}
+    {% set right_logo = state_attr(e,'opponent_logo') or '' %}
 
-<<<<<<< HEAD
-    {% set left_logo  = state_attr('sensor.detriot_lions','team_logo') %} {% set
-    right_logo = state_attr('sensor.detriot_lions','opponent_logo') %}
-=======
-    {% set left_logo  = state_attr('sensor.detriot_lions','team_logo') %}
-    {% set right_logo = state_attr('sensor.detriot_lions','opponent_logo') %}
->>>>>>> 826f49e47e31ef368ead3febd504a277a6d511e3
-
-    {% set is_live = (states('sensor.detriot_lions') == 'IN') %}
-
+    {% set is_live = (states(e) == 'IN') %}
 
     ha-card {
       width: 100%;
@@ -82,18 +103,21 @@ card_mod:
       padding: 16px 16px 14px 16px;
       position: relative;
 
+      {% if left_logo %}
       background:
         url("{{ left_logo }}") left 16px center / 28% auto no-repeat,
         url("{{ right_logo }}") right 16px center / 28% auto no-repeat,
         linear-gradient(90deg, {{ t0 }} 0%, {{ t1 }} 28%, {{ o1 }} 72%, {{ o0 }} 100%);
-      color: white;
+      {% else %}
+      background: linear-gradient(90deg, {{ t0 }} 0%, {{ t1 }} 28%, {{ o1 }} 72%, {{ o0 }} 100%);
+      {% endif %}
 
+      color: white;
       border: 0;
       box-shadow: 0 6px 20px rgba(0,0,0,0.18);
       border-radius: 16px;
       overflow: hidden;
     }
-
 
     ha-card::before {
       content: "";
@@ -102,7 +126,6 @@ card_mod:
       border-radius: 16px;
       pointer-events: none;
     }
-
 
     ha-card::after {
       content: "LIVE";
@@ -121,11 +144,8 @@ card_mod:
       50%     { box-shadow: 0 0 14px rgba(255,0,0,0.85); }
     }
 
-
     ha-card > * { position: relative; }
-
     :host { --mush-badge-size: 28px; }
-
 
     .primary, .secondary {
       text-shadow: 0 2px 4px rgba(0,0,0,0.6);
