@@ -1,25 +1,30 @@
 /*
-  Set Relay Mode Based on WiFi status and Home Assistant reachability
-  
+  Set Relay Mode Based on Home Assistant Availability
+
   Summary:
-  - This Script for a Shelly relay is designed to monitor if the device is connected to WiFi
-  - and also able to make a HTTP GET request to a Home Assistant server.
-  - If it detects everything is up, it will set the relay to a specific mode and a different
-  - one if it is not able to.
-  
+  - This script runs on a Shelly relay and monitors connectivity with a Home Assistant server.
+  - When Home Assistant is reachable, the relay operates in Detached mode, separating the physical switch
+    from the relay—ideal for use with smart bulbs controlled by HA.
+  - When Home Assistant is not reachable, the relay automatically switches to the mode defined by DOWN_MODE
+    (typically Flip/Edge or Follow/Toggle), restoring direct local control.
+
+  Purpose:
+  - Maintain smart-bulb behavior when HA is online.
+  - Provide automatic fallback to physical switch control if HA goes offline.
+
   Notes:
-  - Device must be in "Switch" mode (not Cover).
-  - Works on multi-channel devices (set RELAY_IDS accordingly).
+  - The device must be configured in "Switch" mode (not Cover).
+  - Compatible with multi-channel devices (set RELAY_IDS accordingly).
 */
 
+
 //////////////////// USER SETTINGS ////////////////////
-const HA_URL     = "http://192.168.0.30:8123/"; // <-- Prefer IP over .local
+const HA_URL     = "http://homeassistant.local:8123/"; // Works with IP, DNS and mDNS (.local)
 const RELAY_IDS  = [0];                         // e.g., [0] or [0,1]
-const CHECK_MS   = 5000;                        // periodic check interval
+const CHECK_MS   = 5000;                        // periodic check interval (ms)
 const TIMEOUT_MS = 4000;                        // HTTP timeout (ms)
-const UP_MODE    = "detached";                  // when HA is reachable
-const DOWN_MODE  = "follow";                    // when HA is not reachable
-// If HA uses self-signed HTTPS, switch HA_URL to https://... and add ssl_ca:"*"
+const UP_MODE    = "detached";                  // when HA is reachable ("detached")
+const DOWN_MODE  = "follow";                    // when HA is not reachable ("flip" and "follow")
 ///////////////////////////////////////////////////////
 
 let lastApplied = null;   // cache of the last global desired mode
