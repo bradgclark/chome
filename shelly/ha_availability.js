@@ -1,5 +1,25 @@
 /*
   Set Relay Mode Based on WiFi status and Home Assistant reachability
+  
+  Summary:
+  - This Script for a Shelly relay is designed to monitor if the device is connected to WiFi
+  - and also able to make a HTTP GET request to a Home Assistant server.
+  - If it detects everything is up, it will set the relay to a specific mode and a different
+  - one if it is not able to.
+  - The reason I created this script was for a scenario where you have a dumb wall light switch
+  - and on the other end of it are smart light bulbs.  Putting a Shelly in Detached mode will prevent
+  - the bulbs from losing power when the switch is turned on and off.  
+  - In this mode, you will need to create an Automation in Home Assistant where the Light entities that are on the
+  - switch follow the state of the Input sensor on the Shelly Relay.  You can use individual bulbs or a light group.
+  - I personally use the Smart Light Blueprint by u/blacky for this:
+  - https://community.home-assistant.io/t/smart-light-entity-sun-elevation-ambient-time-triggers/
+  - 
+  - In the circumstance that the Home Assistant Server or the WiFi network is unavailable, the wall switch will not be
+  - able to turn the lights on an off in Detached mode as it is relying on Home Assistant.
+  - This script is designed to switch the relay to Follow mode so the light switches operate in a standalone mode
+  - without Home Assistant.
+  - Once the relay is able to access Home Assistant again, it will switch back to Detached mode.
+  
   Notes:
   - Device must be in "Switch" mode (not Cover).
   - Works on multi-channel devices (set RELAY_IDS accordingly).
