@@ -6,7 +6,7 @@
 */
 
 //////////////////// USER SETTINGS ////////////////////
-const HA_URL     = "http://192.168.1.30:8123/"; // <-- Prefer IP over .local
+const HA_URL     = "http://192.168.0.30:8123/"; // <-- Prefer IP over .local
 const RELAY_IDS  = [0];                         // e.g., [0] or [0,1]
 const CHECK_MS   = 5000;                        // periodic check interval
 const TIMEOUT_MS = 4000;                        // HTTP timeout (ms)
