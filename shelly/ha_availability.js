@@ -1,7 +1,7 @@
 /*
   Shelly 2PM:
   - If Home Assistant is reachable -> in_mode = "detached"
-  - If not reachable                -> in_mode = "toggle"
+  - If not reachable                -> in_mode = "flip"
 */
 
 //////////////////// USER SETTINGS ////////////////////
@@ -35,7 +35,7 @@ function checkHA(cb) {
 }
 
 function applyMode(haUp) {
-  var desired = haUp ? "detached" : "toggle";
+  var desired = haUp ? "detached" : "flip";
   for (var i = 0; i < RELAY_IDS.length; i++) {
     setInModeIfNeeded(RELAY_IDS[i], desired);
   }
