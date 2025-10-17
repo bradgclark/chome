@@ -1,5 +1,5 @@
 /*
-  Set Relay Mode Based on Home Assistant Availability (fleet-friendly)
+  Set Relay Mode Based on Home Assistant Availability
 
   Summary:
   - This script runs on a Shelly relay and monitors connectivity with a Home Assistant server.
