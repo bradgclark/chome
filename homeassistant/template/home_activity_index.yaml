@@ -1,5 +1,6 @@
 {# ---------------------------------------------------------
-   All Home Activity Index (0–100%)
+   All Home Activity Index (0–100)
+   - Presence is counted by *areas* (binary_sensor.<area>_presence)
    --------------------------------------------------------- #}
 
 {% macro frac(num, den) -%}
@@ -9,12 +10,12 @@
 {%- endmacro %}
 
 {# ---- Weights (sum = 1.0) ---- #}
-{% set w_motion   = 0.23 %}
-{% set w_doors    = 0.12 %}
-{% set w_people   = 0.07 %}
-{% set w_presence = 0.12 %}
-{% set w_move     = 0.28 %}
-{% set w_media    = 0.18 %}
+{% set w_motion   = 0.20 %}
+{% set w_doors    = 0.10 %}
+{% set w_people   = 0.15 %}
+{% set w_presence = 0.20 %}
+{% set w_move     = 0.25 %}
+{% set w_media    = 0.10 %}
 
 {# Night detection #}
 {% set is_night = (states('sun.sun') not in ['unknown','unavailable','none',''] and is_state('sun.sun','below_horizon')) %}
@@ -63,17 +64,17 @@
 {% set people_home  = people | selectattr('state','eq','home') | list | count %}
 {% set people_total = people | count %}
 
-{# Presence binary_sensors #}
-{% set presence_ids = states.binary_sensor
-  | selectattr('attributes.device_class','eq','presence')
+{# Presence by AREA (expects binary_sensor.<area>_presence) #}
+{% set presence_area_ids = states.binary_sensor
   | map(attribute='entity_id')
   | reject('is_hidden_entity')
+  | select('match','^binary_sensor\\.[a-z0-9_]+_presence$')
   | list %}
-{% set presence_sensors = expand(presence_ids)
+{% set presence_area_sensors = expand(presence_area_ids)
   | rejectattr('state','in',['unknown','unavailable'])
   | list %}
-{% set presence_total = presence_sensors | count %}
-{% set presence_on    = presence_sensors | selectattr('state','eq','on') | list | count %}
+{% set presence_area_total = presence_area_sensors | count %}
+{% set presence_area_on    = presence_area_sensors | selectattr('state','eq','on') | list | count %}
 
 {# Recent movement: motion that is ON and changed recently #}
 {% set cutoff_move = now() - timedelta(minutes=5) %}
@@ -82,8 +83,9 @@
   | selectattr('last_changed','gt',cutoff_move)
   | list | count %}
 
+{# Movement normalization base (prefer area-presence count) #}
 {% set move_base_raw =
-  presence_total if presence_total > 0
+  presence_area_total if presence_area_total > 0
   else (motion_total if motion_total > 0 else 1)
 %}
 {% set move_base = [move_base_raw, 20] | min %}
@@ -109,17 +111,17 @@
 {% set avg_volume = 0 if media_playing == 0 else (ns.vol_sum / media_playing) %}
 {% set media_fraction = (frac(media_playing, media_total) | float(0)) %}
 
-{# Media contribution: lower volume influence + cap, tighter at night #}
-{% set vol_bonus_raw = 0.0 if media_playing == 0 else (0.20 + ((avg_volume | float(0)) * 0.50)) %}
-{% set vol_bonus = [vol_bonus_raw, 0.70] | min %}
+{# Media contribution: lower influence + cap, tighter at night #}
+{% set vol_bonus_raw = 0.0 if media_playing == 0 else (0.15 + ((avg_volume | float(0)) * 0.40)) %}
+{% set vol_bonus = [vol_bonus_raw, 0.55] | min %}
 {% set media_factor_raw = (media_fraction * vol_bonus) | float(0) %}
-{% set media_cap = 0.35 if is_night else 0.60 %}
+{% set media_cap = 0.25 if is_night else 0.45 %}
 {% set media_factor = [media_factor_raw, media_cap] | min %}
 
 {# Combine everything #}
 {% set total_sources =
   motion_total + doors_total + people_total +
-  presence_total + media_total
+  presence_area_total + media_total
 %}
 
 {% if total_sources == 0 %}
@@ -129,30 +131,33 @@
   media_playing == 0 and
   doors_active_count == 0 and
   motion_on == 0 and
-  recent_moves_count == 0
+  recent_moves_count == 0 and
+  presence_area_on == 0
 %}
   {{ 0 }}
 {% else %}
 
+  {# Raw score #}
   {% set raw = (
     w_motion   * (frac(motion_on, motion_total) | float(0)) +
     w_doors    * (frac(doors_active_count, doors_total) | float(0)) +
     w_people   * (frac(people_home, people_total) | float(0)) +
-    w_presence * (frac(presence_on, presence_total) | float(0)) +
+    w_presence * (frac(presence_area_on, presence_area_total) | float(0)) +
     w_move     * (frac(recent_moves_count, move_base) | float(0)) +
     w_media    * (media_factor | float(0))
   ) | float(0) %}
 
+  {# Gentle curve: don’t crush “calm but occupied” #}
   {% if raw <= 0 %}
     {% set idx_frac = 0 %}
   {% elif raw >= 0.99 %}
     {% set idx_frac = 1 %}
   {% elif raw < 0.4 %}
-    {% set idx_frac = raw ** 1.4 %}
+    {% set idx_frac = raw ** 1.1 %}
   {% elif raw > 0.85 %}
     {% set idx_frac = 0.9 + (raw - 0.85) / 0.15 * 0.1 %}
   {% else %}
-    {% set idx_frac = raw ** 0.7 %}
+    {% set idx_frac = raw ** 0.75 %}
   {% endif %}
 
   {{ (idx_frac * 100) | round(0) | int }}
