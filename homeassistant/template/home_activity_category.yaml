@@ -1,0 +1,17 @@
+{% set idx = states('sensor.all_home_activity_index') | int(0) %}
+
+{% if idx <= 2 %}
+  Empty
+{% elif idx <= 10 %}
+  Calm
+{% elif idx <= 25 %}
+  Light
+{% elif idx <= 50 %}
+  Steady
+{% elif idx <= 75 %}
+  Active
+{% elif idx <= 90 %}
+  Busy
+{% else %}
+  Chaos
+{% endif %}

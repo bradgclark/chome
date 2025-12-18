@@ -1,0 +1,160 @@
+{# ---------------------------------------------------------
+   All Home Activity Index (0–100%)
+   --------------------------------------------------------- #}
+
+{% macro frac(num, den) -%}
+  {%- set n = num | float(0) -%}
+  {%- set d = den | float(0) -%}
+  {{ 0 if d <= 0 else (n / d) }}
+{%- endmacro %}
+
+{# ---- Weights (sum = 1.0) ---- #}
+{% set w_motion   = 0.23 %}
+{% set w_doors    = 0.12 %}
+{% set w_people   = 0.07 %}
+{% set w_presence = 0.12 %}
+{% set w_move     = 0.28 %}
+{% set w_media    = 0.18 %}
+
+{# Night detection #}
+{% set is_night = (states('sun.sun') not in ['unknown','unavailable','none',''] and is_state('sun.sun','below_horizon')) %}
+
+{# Motion/occupancy binary_sensors #}
+{% set motion_ids = states.binary_sensor
+  | selectattr('attributes.device_class','in',['motion','occupancy'])
+  | map(attribute='entity_id')
+  | reject('is_hidden_entity')
+  | list %}
+{% set motion_sensors = expand(motion_ids)
+  | rejectattr('state','in',['unknown','unavailable'])
+  | list %}
+{% set motion_on    = motion_sensors | selectattr('state','eq','on') | list | count %}
+{% set motion_total = motion_sensors | count %}
+
+{# Doors/windows binary_sensors #}
+{% set door_ids = states.binary_sensor
+  | selectattr('attributes.device_class','in',['door','window','opening'])
+  | map(attribute='entity_id')
+  | reject('is_hidden_entity')
+  | list %}
+{% set door_sensors = expand(door_ids)
+  | rejectattr('state','in',['unknown','unavailable'])
+  | list %}
+{% set doors_total = door_sensors | count %}
+{% set cutoff_doors = now() - timedelta(minutes=10) %}
+{% set doors_open_ids = door_sensors
+  | selectattr('state','eq','on')
+  | map(attribute='entity_id')
+  | list %}
+{% set doors_recent_ids = door_sensors
+  | selectattr('last_changed','gt',cutoff_doors)
+  | map(attribute='entity_id')
+  | list %}
+{% set doors_active_count = (doors_open_ids + doors_recent_ids) | unique | list | count %}
+
+{# People #}
+{% set people_ids = states.person
+  | map(attribute='entity_id')
+  | reject('is_hidden_entity')
+  | list %}
+{% set people = expand(people_ids)
+  | rejectattr('state','in',['unknown','unavailable'])
+  | list %}
+{% set people_home  = people | selectattr('state','eq','home') | list | count %}
+{% set people_total = people | count %}
+
+{# Presence binary_sensors #}
+{% set presence_ids = states.binary_sensor
+  | selectattr('attributes.device_class','eq','presence')
+  | map(attribute='entity_id')
+  | reject('is_hidden_entity')
+  | list %}
+{% set presence_sensors = expand(presence_ids)
+  | rejectattr('state','in',['unknown','unavailable'])
+  | list %}
+{% set presence_total = presence_sensors | count %}
+{% set presence_on    = presence_sensors | selectattr('state','eq','on') | list | count %}
+
+{# Recent movement: motion that is ON and changed recently #}
+{% set cutoff_move = now() - timedelta(minutes=5) %}
+{% set recent_moves_count = motion_sensors
+  | selectattr('state','eq','on')
+  | selectattr('last_changed','gt',cutoff_move)
+  | list | count %}
+
+{% set move_base_raw =
+  presence_total if presence_total > 0
+  else (motion_total if motion_total > 0 else 1)
+%}
+{% set move_base = [move_base_raw, 20] | min %}
+
+{# Media players (exclude hidden; factor in volume) #}
+{% set media_ids = states.media_player
+  | map(attribute='entity_id')
+  | reject('is_hidden_entity')
+  | list %}
+{% set media_players = expand(media_ids)
+  | rejectattr('state','in',['unknown','unavailable'])
+  | list %}
+{% set media_total = media_players | count %}
+
+{% set ns = namespace(playing=0, vol_sum=0.0) %}
+{% for m in media_players %}
+  {% if m.state == 'playing' %}
+    {% set ns.playing = ns.playing + 1 %}
+    {% set ns.vol_sum = ns.vol_sum + (state_attr(m.entity_id,'volume_level') | float(0)) %}
+  {% endif %}
+{% endfor %}
+{% set media_playing = ns.playing %}
+{% set avg_volume = 0 if media_playing == 0 else (ns.vol_sum / media_playing) %}
+{% set media_fraction = (frac(media_playing, media_total) | float(0)) %}
+
+{# Media contribution: lower volume influence + cap, tighter at night #}
+{% set vol_bonus_raw = 0.0 if media_playing == 0 else (0.20 + ((avg_volume | float(0)) * 0.50)) %}
+{% set vol_bonus = [vol_bonus_raw, 0.70] | min %}
+{% set media_factor_raw = (media_fraction * vol_bonus) | float(0) %}
+{% set media_cap = 0.35 if is_night else 0.60 %}
+{% set media_factor = [media_factor_raw, media_cap] | min %}
+
+{# Combine everything #}
+{% set total_sources =
+  motion_total + doors_total + people_total +
+  presence_total + media_total
+%}
+
+{% if total_sources == 0 %}
+  {{ 0 }}
+{% elif
+  people_home == 0 and
+  media_playing == 0 and
+  doors_active_count == 0 and
+  motion_on == 0 and
+  recent_moves_count == 0
+%}
+  {{ 0 }}
+{% else %}
+
+  {% set raw = (
+    w_motion   * (frac(motion_on, motion_total) | float(0)) +
+    w_doors    * (frac(doors_active_count, doors_total) | float(0)) +
+    w_people   * (frac(people_home, people_total) | float(0)) +
+    w_presence * (frac(presence_on, presence_total) | float(0)) +
+    w_move     * (frac(recent_moves_count, move_base) | float(0)) +
+    w_media    * (media_factor | float(0))
+  ) | float(0) %}
+
+  {% if raw <= 0 %}
+    {% set idx_frac = 0 %}
+  {% elif raw >= 0.99 %}
+    {% set idx_frac = 1 %}
+  {% elif raw < 0.4 %}
+    {% set idx_frac = raw ** 1.4 %}
+  {% elif raw > 0.85 %}
+    {% set idx_frac = 0.9 + (raw - 0.85) / 0.15 * 0.1 %}
+  {% else %}
+    {% set idx_frac = raw ** 0.7 %}
+  {% endif %}
+
+  {{ (idx_frac * 100) | round(0) | int }}
+
+{% endif %}
