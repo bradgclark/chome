@@ -1,0 +1,38 @@
+alias: 🔄 Restart All Shelly Devices
+description: Press the restart button for every Shelly device (Shelly integration).
+mode: single
+sequence:
+  - variables:
+      shelly_restart_buttons: |-
+        {{
+          integration_entities('shelly')
+          | select('match', '^button\\..*')
+          | select('search', '_restart$')
+          | list
+        }}
+  - if:
+      - condition: template
+        value_template: "{{ shelly_restart_buttons | length > 0 }}"
+    then:
+      - data:
+          level: warning
+          message: >-
+            Restarting Shelly devices via buttons: {{ shelly_restart_buttons |
+            join(', ') }}
+        action: system_log.write
+      - repeat:
+          for_each: "{{ shelly_restart_buttons }}"
+          sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ states(repeat.item) not in ['unknown', 'unavailable'] }}"
+              then:
+                - target:
+                    entity_id: "{{ repeat.item }}"
+                  action: button.press
+                - delay: "00:00:02"
+    else:
+      - data:
+          level: info
+          message: No Shelly restart buttons found (Shelly integration).
+        action: system_log.write
