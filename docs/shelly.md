@@ -72,3 +72,20 @@ Any HTTP status below `500` is considered reachable. That means `401` or `403` i
 Test on one device before deploying to a whole fleet.
 
 Confirm the fallback input mode is right for your wiring. Incorrect input mode settings can make a wall switch feel inverted or behave differently than expected.
+
+## Matching Home Assistant Automation
+
+File: [`homeassistant/automation/shelly_detached_wall_switch_light_sync.yaml`](../homeassistant/automation/shelly_detached_wall_switch_light_sync.yaml)
+
+Guide: [`docs/shelly-wall-switch-sync.md`](shelly-wall-switch-sync.md)
+
+Use this automation with `ha_availability.js` when the Shelly relay is in detached mode and the wall switch should control a smart light through Home Assistant.
+
+The automation expects this naming pattern:
+
+```text
+binary_sensor.<base>_wall_switch*  ->  light.<base>
+switch.<base>_wall_switch*         ->  light.<base>
+```
+
+It only mirrors the wall switch to the light when the Shelly device has a `switch.*_ha_availability` entity and that entity is `on`.
