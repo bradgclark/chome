@@ -27,6 +27,7 @@ Read this first if you want to install the AppDaemon app in another Home Assista
 Path: [`homeassistant/`](../homeassistant/)
 
 Contains Home Assistant examples that can be copied into dashboards, scripts, packages, or template sensors.
+Automation examples live under `homeassistant/automation/`.
 
 Guide:
 
