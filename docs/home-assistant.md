@@ -54,7 +54,7 @@ The card expects these helpers:
 - `input_text.home_intelligence_status`
 - `input_text.home_intelligence_structured_json`
 
-Full guide: [`home-intelligence/docs/dashboard.md`](../home-intelligence/docs/dashboard.md)
+Full guide: [`appdaemon/home-intelligence/docs/dashboard.md`](../appdaemon/home-intelligence/docs/dashboard.md)
 
 ## Activity Index Templates
 
