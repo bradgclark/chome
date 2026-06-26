@@ -1,0 +1,75 @@
+alias: Shelly Detached Wall Switch Light Sync
+description: >
+  Maps (binary_sensor|switch).<name>_wall_switch* to light.<name> and syncs
+  only when the wall switch entity flips on or off while the Shelly device's
+  ha_availability switch is on.
+mode: queued
+max: 50
+
+trigger:
+  - platform: event
+    event_type: state_changed
+
+condition:
+  - condition: template
+    value_template: >-
+      {% set e = trigger.event.data.entity_id %}
+      {% set ns = trigger.event.data.new_state %}
+      {% set os = trigger.event.data.old_state %}
+      {{
+        e is string
+        and (e.startswith('binary_sensor.') or e.startswith('switch.'))
+        and '_wall_switch' in e
+        and ns is not none
+        and os is not none
+        and ns.state in ['on', 'off']
+        and os.state in ['on', 'off']
+        and ns.state != os.state
+      }}
+
+action:
+  - variables:
+      trig_entity: "{{ trigger.event.data.entity_id }}"
+      new_state: "{{ trigger.event.data.new_state.state }}"
+      obj_id: "{{ trig_entity.split('.', 1)[1] }}"
+      base_name: "{{ obj_id.split('_wall_switch', 1)[0] }}"
+      light_entity: "{{ 'light.' ~ base_name }}"
+      availability_entity: >-
+        {% set dev = device_id(trig_entity) %}
+        {% set ns = namespace(entity='') %}
+        {% if dev %}
+          {% for e in device_entities(dev) %}
+            {% if e.startswith('switch.') and e.endswith('_ha_availability') %}
+              {% set ns.entity = e %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+        {{ ns.entity }}
+
+  - condition: template
+    value_template: "{{ states[light_entity] is not none }}"
+
+  - condition: template
+    value_template: >-
+      {{
+        availability_entity | length > 0
+        and states[availability_entity] is not none
+        and is_state(availability_entity, 'on')
+      }}
+
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ new_state == 'on' }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: "{{ light_entity }}"
+
+      - conditions:
+          - condition: template
+            value_template: "{{ new_state == 'off' }}"
+        sequence:
+          - service: light.turn_off
+            target:
+              entity_id: "{{ light_entity }}"
