@@ -37,6 +37,30 @@ If you expose media state through helpers, use `input_text` entities with names 
 
 The app will discover these when `discover_media_helpers` is enabled.
 
+## People and BLE Area Helpers
+
+If you use Bermuda BLE or another room-location system, add those sensors under `people` in `apps.yaml`:
+
+```yaml
+people:
+  - name: Alex
+    person: person.alex
+    area: sensor.alex_ble_area
+    location: sensor.alex_location
+```
+
+The `area` helper tells Home Intelligence where a person appears to be moving. Magic Areas aggregates then describe what is happening in that room.
+
 ## Fallback Raw Entities
 
 When no aggregate exists for an area, the app can listen to raw lights, fans, media players, switches, covers, and locks.
+
+## Practical Trigger Recipe
+
+For the best signal:
+
+1. Use Magic Areas aggregate/group entities for routine room state.
+2. Add Bermuda BLE area helpers under `people` for movement context.
+3. Add media `input_text` helpers for titles, shows, or songs.
+4. List safety, security, water, garage, and important appliance alerts directly.
+5. Avoid raw diagnostic entities such as RSSI, battery, firmware, uptime, and connectivity.
