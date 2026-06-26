@@ -14,6 +14,7 @@ It is designed for homes where raw Home Assistant state changes are too noisy to
 - Writes a human-readable feed to `input_text.home_intelligence_feed`.
 - Optionally writes status and structured JSON helpers.
 - Sends notifications only for `ACTION` or `URGENT` events when notification services are configured.
+- Uses person, area, and location helpers so Bermuda BLE or similar room-tracking sensors can add movement context.
 
 ## Folder Layout
 
@@ -112,6 +113,38 @@ That keeps routine light, media, and motion chatter from flooding the app while 
 
 See [`docs/triggers.md`](docs/triggers.md) for detailed examples.
 
+## Notification Strategy
+
+Home Intelligence has a simple hierarchy:
+
+- `NORMAL`: ignored.
+- `INFO`: written to dashboard helpers, often buffered into an area summary.
+- `ACTION`: written to helpers and sent through `notify_services`.
+- `URGENT`: reserved for higher-priority extensions and handled like `ACTION`.
+
+See [`docs/notifications.md`](docs/notifications.md) for the full flow.
+
+## Dashboard Summary
+
+The quickest dashboard setup is a Markdown card:
+
+```yaml
+type: markdown
+title: Home Intelligence
+content: >
+  **Latest:** {{ states('input_text.home_intelligence_feed') }}
+
+  **Status:** {{ states('input_text.home_intelligence_status') }}
+```
+
+See [`docs/dashboard.md`](docs/dashboard.md) and [`../homeassistant/lovelace/home_intelligence_summary.yaml`](../homeassistant/lovelace/home_intelligence_summary.yaml).
+
+## Context and Room Movement
+
+If you use Bermuda BLE, add each person's room/area sensor under `people`. If you use Magic Areas, let Home Intelligence discover the aggregate area entities. Together they provide "who moved where" and "what changed in the room" without listening to every raw device.
+
+See [`docs/context-and-ble.md`](docs/context-and-ble.md).
+
 ## Required Helpers
 
 At minimum:
@@ -126,6 +159,9 @@ Use [`home-assistant/helpers.yaml`](home-assistant/helpers.yaml) as a starting p
 
 - [`docs/configuration.md`](docs/configuration.md): configuration reference.
 - [`docs/triggers.md`](docs/triggers.md): trigger design and examples.
+- [`docs/notifications.md`](docs/notifications.md): severity hierarchy and notification routing.
+- [`docs/dashboard.md`](docs/dashboard.md): Lovelace dashboard setup.
+- [`docs/context-and-ble.md`](docs/context-and-ble.md): Magic Areas and Bermuda BLE context.
 - [`examples/explicit-triggers.apps.yaml`](examples/explicit-triggers.apps.yaml): explicit trigger configuration.
 
 ## Notes
