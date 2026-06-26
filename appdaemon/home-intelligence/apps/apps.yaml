@@ -1,0 +1,43 @@
+---
+home_intelligence:
+  module: home_intelligence
+  class: HomeIntelligence
+
+  people:
+    # - name: Alex
+    #   person: person.alex
+    #   area: sensor.alex_ble_area
+    #   location: sensor.alex_location
+
+  critical_entities:
+    # - binary_sensor.water_meter_high_flow
+    # - binary_sensor.laundry_room_leak
+    # - binary_sensor.garage_smoke_alarm
+
+  opening_entities:
+    # - binary_sensor.front_door
+    # - cover.garage_door
+
+  helper_entities:
+    # - sensor.activity_category
+    # - input_text.kitchen_now_playing
+
+  trigger_entities: []
+
+  helpers:
+    feed: input_text.home_intelligence_feed
+    status: input_text.home_intelligence_status
+    structured_json: input_text.home_intelligence_structured_json
+
+  notify_services:
+    # - notify.mobile_app_your_phone
+
+  controls:
+    discover_magic_areas: true
+    discover_area_devices: true
+    discover_safety: true
+    discover_media_helpers: true
+    startup_settle_seconds: 90
+    area_debounce_seconds: 90
+    area_max_items: 20
+    event_cooldown_seconds: 3
