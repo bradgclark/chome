@@ -6,6 +6,7 @@ The `homeassistant/` folder contains reusable Home Assistant examples. Some are 
 
 | File | Type | Purpose |
 | --- | --- | --- |
+| [`homeassistant/automation/shelly_detached_wall_switch_light_sync.yaml`](../homeassistant/automation/shelly_detached_wall_switch_light_sync.yaml) | Automation | Mirrors Shelly detached-mode wall switch entities to matching smart lights when `ha_availability` is on. |
 | [`homeassistant/scripts/shelly_restart.yaml`](../homeassistant/scripts/shelly_restart.yaml) | Script | Finds Shelly restart button entities and presses each available one with a short delay. |
 | [`homeassistant/template/home_activity_index.yaml`](../homeassistant/template/home_activity_index.yaml) | Template body | Calculates a 0-100 whole-home activity score from motion, openings, people, area presence, recent movement, and media playback. |
 | [`homeassistant/template/home_activity_category.yaml`](../homeassistant/template/home_activity_category.yaml) | Template body | Converts `sensor.all_home_activity_index` into a friendly category such as Calm, Active, Busy, or Chaos. |
@@ -26,6 +27,21 @@ What to check:
 - The script discovers entities from `integration_entities('shelly')`.
 - It only presses `button.*_restart` entities that are not `unknown` or `unavailable`.
 - It writes a warning-level system log entry listing the buttons it will press.
+
+## Shelly Detached Wall Switch Sync
+
+Use this with [`shelly/ha_availability.js`](../shelly/ha_availability.js) when Shelly relays run in detached mode while Home Assistant is online.
+
+The automation maps wall switch entities to matching lights by entity ID:
+
+```text
+binary_sensor.<base>_wall_switch*  ->  light.<base>
+switch.<base>_wall_switch*         ->  light.<base>
+```
+
+It only runs when the matching Shelly device exposes `switch.*_ha_availability` and that switch is `on`.
+
+Full guide: [`docs/shelly-wall-switch-sync.md`](shelly-wall-switch-sync.md)
 
 ## Activity Index Templates
 
