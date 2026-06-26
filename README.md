@@ -69,6 +69,9 @@ Most files are examples, not full private configuration exports. They are intend
 - [`home-intelligence/README.md`](home-intelligence/README.md): Home Intelligence install guide.
 - [`home-intelligence/docs/configuration.md`](home-intelligence/docs/configuration.md): Home Intelligence configuration reference.
 - [`home-intelligence/docs/triggers.md`](home-intelligence/docs/triggers.md): Trigger strategy and examples.
+- [`home-intelligence/docs/notifications.md`](home-intelligence/docs/notifications.md): Home Intelligence severity and notification hierarchy.
+- [`home-intelligence/docs/dashboard.md`](home-intelligence/docs/dashboard.md): Dashboard setup for the Home Intelligence summary.
+- [`home-intelligence/docs/context-and-ble.md`](home-intelligence/docs/context-and-ble.md): Magic Areas and Bermuda BLE context.
 - [`docs/home-assistant.md`](docs/home-assistant.md): Home Assistant snippet guide.
 - [`docs/shelly.md`](docs/shelly.md): Shelly script guide.
 - [`docs/shelly-wall-switch-sync.md`](docs/shelly-wall-switch-sync.md): Detached wall switch light sync automation.
