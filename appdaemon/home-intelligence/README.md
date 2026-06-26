@@ -30,9 +30,29 @@ appdaemon/home-intelligence/
   home-assistant/helpers.yaml    Helper definitions
 ```
 
+## Install AppDaemon Add-on
+
+If you already have AppDaemon installed and running, skip to [Quick Install](#quick-install).
+
+For Home Assistant OS or a supervised Home Assistant install:
+
+1. Open **Settings** > **Add-ons** > **Add-on Store**.
+2. If AppDaemon is not already listed, open the three-dot menu, choose **Repositories**, and add the Home Assistant Community Add-ons repository:
+
+   ```text
+   https://github.com/hassio-addons/repository
+   ```
+
+3. Search for `AppDaemon`.
+4. Install the **AppDaemon** add-on.
+5. Start the add-on and enable **Start on boot** and **Watchdog**.
+6. Open the add-on logs and confirm AppDaemon starts cleanly.
+
+If the add-on creates a working AppDaemon configuration for you, keep it and only merge the `apps/` files from this package. Use the included [`appdaemon.yaml`](appdaemon.yaml) as a starter or comparison file, not as something to blindly overwrite on an existing install.
+
 ## Quick Install
 
-1. Install AppDaemon for Home Assistant.
+1. Install AppDaemon for Home Assistant if it is not already running.
 2. Copy [`apps/home_intelligence.py`](apps/home_intelligence.py) into your AppDaemon `apps/` folder.
 3. Copy or merge [`apps/apps.yaml`](apps/apps.yaml) into your AppDaemon `apps.yaml`.
 4. Create the Home Assistant helpers from [`home-assistant/helpers.yaml`](home-assistant/helpers.yaml).
@@ -51,6 +71,16 @@ Inside the AppDaemon container it is usually:
 ```text
 /config/apps
 ```
+
+For the add-on, the usual file mapping is:
+
+```text
+apps/home_intelligence.py  ->  /addon_configs/a0d7b954_appdaemon/apps/home_intelligence.py
+apps/apps.yaml            ->  /addon_configs/a0d7b954_appdaemon/apps/apps.yaml
+appdaemon.yaml            ->  /addon_configs/a0d7b954_appdaemon/appdaemon.yaml
+```
+
+Only copy `appdaemon.yaml` if you need a starter daemon config. If your add-on already has a working `appdaemon.yaml`, merge settings deliberately and keep its existing Home Assistant plugin connection.
 
 ## Minimal Configuration
 
