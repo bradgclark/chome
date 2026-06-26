@@ -9,7 +9,7 @@ CHOME is a public collection of practical Home Assistant, AppDaemon, and Shelly 
 | Home Intelligence | [`home-intelligence/`](home-intelligence/) | Portable AppDaemon app that turns noisy Home Assistant state changes into a concise household activity feed. |
 | AppDaemon package | [`appdaemon/home-intelligence/`](appdaemon/home-intelligence/) | Ready-to-copy AppDaemon files for the Home Intelligence app. |
 | Home Assistant snippets | [`homeassistant/`](homeassistant/) | Lovelace cards, scripts, and template examples for Home Assistant. |
-| Shelly scripts | [`shelly/`](shelly/) | Shelly Gen2 JavaScript for resilient smart-bulb switch behavior when Home Assistant is online or offline. |
+| Shelly scripts | [`shelly/`](shelly/) | Shelly Gen2 JavaScript and matching Home Assistant automation examples for resilient smart-bulb switch behavior. |
 
 ## Start Here
 
@@ -23,7 +23,7 @@ If you want the AppDaemon Home Intelligence app:
 If you want the smaller examples:
 
 1. Browse [`docs/home-assistant.md`](docs/home-assistant.md) for the Home Assistant snippets.
-2. Browse [`docs/shelly.md`](docs/shelly.md) for the Shelly script.
+2. Browse [`docs/shelly.md`](docs/shelly.md) for the Shelly script and detached wall switch automation.
 3. Copy only the piece you need and replace entity IDs, URLs, and helper names with your own.
 
 ## Repository Layout
@@ -39,6 +39,7 @@ home-intelligence/
   home-assistant/           Home Assistant helper definitions
 
 homeassistant/
+  automation/               Automation examples
   lovelace/                 Dashboard card examples
   scripts/                  Script examples
   template/                 Template sensor fragments
@@ -70,3 +71,4 @@ Most files are examples, not full private configuration exports. They are intend
 - [`home-intelligence/docs/triggers.md`](home-intelligence/docs/triggers.md): Trigger strategy and examples.
 - [`docs/home-assistant.md`](docs/home-assistant.md): Home Assistant snippet guide.
 - [`docs/shelly.md`](docs/shelly.md): Shelly script guide.
+- [`docs/shelly-wall-switch-sync.md`](docs/shelly-wall-switch-sync.md): Detached wall switch light sync automation.
