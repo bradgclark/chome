@@ -7,6 +7,7 @@ The `homeassistant/` folder contains reusable Home Assistant examples. Some are 
 | File | Type | Purpose |
 | --- | --- | --- |
 | [`homeassistant/automation/shelly_detached_wall_switch_light_sync.yaml`](../homeassistant/automation/shelly_detached_wall_switch_light_sync.yaml) | Automation | Mirrors Shelly detached-mode wall switch entities to matching smart lights when `ha_availability` is on. |
+| [`homeassistant/lovelace/home_intelligence_summary.yaml`](../homeassistant/lovelace/home_intelligence_summary.yaml) | Lovelace card | Dashboard card for the Home Intelligence feed, status, and structured JSON helpers. |
 | [`homeassistant/scripts/shelly_restart.yaml`](../homeassistant/scripts/shelly_restart.yaml) | Script | Finds Shelly restart button entities and presses each available one with a short delay. |
 | [`homeassistant/template/home_activity_index.yaml`](../homeassistant/template/home_activity_index.yaml) | Template body | Calculates a 0-100 whole-home activity score from motion, openings, people, area presence, recent movement, and media playback. |
 | [`homeassistant/template/home_activity_category.yaml`](../homeassistant/template/home_activity_category.yaml) | Template body | Converts `sensor.all_home_activity_index` into a friendly category such as Calm, Active, Busy, or Chaos. |
@@ -42,6 +43,18 @@ switch.<base>_wall_switch*         ->  light.<base>
 It only runs when the matching Shelly device exposes `switch.*_ha_availability` and that switch is `on`.
 
 Full guide: [`docs/shelly-wall-switch-sync.md`](shelly-wall-switch-sync.md)
+
+## Home Intelligence Summary Card
+
+Use this with the portable Home Intelligence AppDaemon package when you want the latest household summary on a dashboard.
+
+The card expects these helpers:
+
+- `input_text.home_intelligence_feed`
+- `input_text.home_intelligence_status`
+- `input_text.home_intelligence_structured_json`
+
+Full guide: [`home-intelligence/docs/dashboard.md`](../home-intelligence/docs/dashboard.md)
 
 ## Activity Index Templates
 
