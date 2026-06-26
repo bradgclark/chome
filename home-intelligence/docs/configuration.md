@@ -6,7 +6,7 @@ Configuration lives in AppDaemon `apps.yaml`.
 
 `people`
 
-Known people and optional location helpers.
+Known people and optional room/location helpers. This is where Bermuda BLE or similar area sensors fit.
 
 ```yaml
 people:
@@ -15,6 +15,8 @@ people:
     area: sensor.alex_ble_area
     location: sensor.alex_location
 ```
+
+`person` should be the Home Assistant person entity. `area` should be a room-level helper such as a Bermuda BLE area sensor. `location` can be a broader location helper if you have one.
 
 `critical_entities`
 
@@ -56,3 +58,29 @@ controls:
 ```
 
 Disable discovery features if your installation has unusual entities or you want a fully explicit trigger list.
+
+## Helpers
+
+Home Intelligence writes to `input_text` helpers.
+
+```yaml
+helpers:
+  feed: input_text.home_intelligence_feed
+  status: input_text.home_intelligence_status
+  structured_json: input_text.home_intelligence_structured_json
+```
+
+`feed` is the dashboard-friendly summary. `status` shows runtime health such as listener count. `structured_json` stores a compact payload with severity, reason, summary, entity, and area.
+
+## Notifications
+
+Notifications are optional. Add Home Assistant notify services when you want `ACTION` or `URGENT` events to push somewhere.
+
+```yaml
+notify_services:
+  - notify.mobile_app_your_phone
+```
+
+Routine `INFO` events stay in the feed and dashboard helpers. Safety-style active events become `ACTION` and call the configured services.
+
+See [`notifications.md`](notifications.md).
