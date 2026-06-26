@@ -1,0 +1,18 @@
+type: vertical-stack
+cards:
+  - type: markdown
+    title: Home Intelligence
+    content: >
+      **Latest:** {{ states('input_text.home_intelligence_feed') }}
+
+      **Status:** {{ states('input_text.home_intelligence_status') }}
+
+  - type: entities
+    title: Home Intelligence Helpers
+    entities:
+      - entity: input_text.home_intelligence_feed
+        name: Latest summary
+      - entity: input_text.home_intelligence_status
+        name: Status
+      - entity: input_text.home_intelligence_structured_json
+        name: Structured event
