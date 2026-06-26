@@ -14,13 +14,13 @@ Current package:
 
 ## Home Intelligence
 
-Path: [`home-intelligence/`](../home-intelligence/)
+Path: [`appdaemon/home-intelligence/`](../appdaemon/home-intelligence/)
 
 Contains the public documentation, examples, and Home Assistant helper definitions for the Home Intelligence app.
 
 Read this first if you want to install the AppDaemon app in another Home Assistant instance:
 
-- [`home-intelligence/README.md`](../home-intelligence/README.md)
+- [`appdaemon/home-intelligence/README.md`](../appdaemon/home-intelligence/README.md)
 
 ## Home Assistant
 
