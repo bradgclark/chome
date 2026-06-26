@@ -1,0 +1,11 @@
+---
+input_text:
+  home_intelligence_feed:
+    name: Home Intelligence Feed
+    max: 255
+  home_intelligence_status:
+    name: Home Intelligence Status
+    max: 255
+  home_intelligence_structured_json:
+    name: Home Intelligence Structured JSON
+    max: 255
