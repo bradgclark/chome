@@ -1,23 +1,45 @@
 # Home Intelligence for AppDaemon
 
-Portable Home Intelligence is an AppDaemon app for Home Assistant. It watches high-signal entities, groups routine activity by area, and writes a concise feed helper. It prefers Magic Areas aggregates/groups when present, while keeping raw critical sensors such as leak, smoke, garage, door, and water-flow entities as direct triggers.
+Home Intelligence is a portable AppDaemon app for Home Assistant. It watches high-signal entities, groups routine activity by area, and writes a concise household activity feed.
+
+It is designed for homes where raw Home Assistant state changes are too noisy to follow directly. The app prefers Magic Areas aggregate/group entities when they exist, uses helper entities when you have already summarized something useful, and keeps critical safety or security entities as direct triggers.
 
 ## What It Does
 
 - Discovers Magic Areas presence, occupancy, light, fan, and media groups.
-- Falls back to real lights, fans, media players, switches, covers, and locks when no group exists.
-- Keeps critical raw sensors direct.
+- Falls back to direct lights, fans, media players, switches, covers, and locks when no group exists.
+- Keeps critical raw sensors direct for leak, smoke, carbon monoxide, garage, door, water, and security events.
 - Supports `input_text` media helpers such as "now playing" or "current show".
 - Buffers routine room activity briefly so one area produces one useful message instead of a burst of entity logs.
 - Writes a human-readable feed to `input_text.home_intelligence_feed`.
+- Optionally writes status and structured JSON helpers.
+- Sends notifications only for `ACTION` or `URGENT` events when notification services are configured.
 
-## Install
+## Folder Layout
 
-1. Install AppDaemon in Home Assistant.
-2. Copy `appdaemon/home-intelligence/apps/home_intelligence.py` into your AppDaemon `apps/` folder.
-3. Copy or merge `appdaemon/home-intelligence/apps/apps.yaml` into your AppDaemon `apps.yaml`.
-4. Create the Home Assistant helpers from `home-intelligence/home-assistant/helpers.yaml`.
-5. Restart AppDaemon.
+```text
+appdaemon/home-intelligence/
+  appdaemon.yaml                 Example AppDaemon daemon config
+  apps/apps.yaml                 Example AppDaemon app config
+  apps/home_intelligence.py      Portable AppDaemon app
+
+home-intelligence/
+  README.md                      This guide
+  docs/configuration.md          Configuration reference
+  docs/triggers.md               Trigger strategy
+  examples/explicit-triggers.apps.yaml
+  home-assistant/helpers.yaml    Helper definitions
+```
+
+## Quick Install
+
+1. Install AppDaemon for Home Assistant.
+2. Copy [`appdaemon/home-intelligence/apps/home_intelligence.py`](../appdaemon/home-intelligence/apps/home_intelligence.py) into your AppDaemon `apps/` folder.
+3. Copy or merge [`appdaemon/home-intelligence/apps/apps.yaml`](../appdaemon/home-intelligence/apps/apps.yaml) into your AppDaemon `apps.yaml`.
+4. Create the Home Assistant helpers from [`home-intelligence/home-assistant/helpers.yaml`](home-assistant/helpers.yaml).
+5. Edit `apps.yaml` for your people, critical entities, openings, helpers, and notification services.
+6. Restart AppDaemon.
+7. Check the AppDaemon logs for `Home Intelligence initialized`.
 
 If you run the official AppDaemon add-on, the runtime app folder is usually:
 
@@ -25,7 +47,7 @@ If you run the official AppDaemon add-on, the runtime app folder is usually:
 /addon_configs/a0d7b954_appdaemon/apps
 ```
 
-In the AppDaemon container it is usually:
+Inside the AppDaemon container it is usually:
 
 ```text
 /config/apps
@@ -45,31 +67,35 @@ home_intelligence:
 
 ## Recommended Configuration
 
-Add known people, critical sensors, and important openings:
-
 ```yaml
 home_intelligence:
   module: home_intelligence
   class: HomeIntelligence
+
   people:
     - name: Alex
       person: person.alex
       area: sensor.alex_ble_area
       location: sensor.alex_location
+
   critical_entities:
     - binary_sensor.water_meter_high_flow
     - binary_sensor.laundry_room_leak
     - binary_sensor.garage_smoke_alarm
+
   opening_entities:
     - binary_sensor.front_door
     - cover.garage_door
+
   helper_entities:
     - sensor.activity_category
     - input_text.kitchen_now_playing
+
   helpers:
     feed: input_text.home_intelligence_feed
     status: input_text.home_intelligence_status
     structured_json: input_text.home_intelligence_structured_json
+
   notify_services:
     - notify.mobile_app_your_phone
 ```
@@ -82,11 +108,11 @@ Use this order:
 2. Curated helper entities for interpreted state.
 3. Raw entities only for critical signals or when no aggregate exists.
 
-Raw critical entities should include safety, security, water, garage, and important appliance states. Routine light/media/motion chatter is better represented by aggregate entities.
+That keeps routine light, media, and motion chatter from flooding the app while preserving important events that should never be hidden behind an aggregate.
+
+See [`docs/triggers.md`](docs/triggers.md) for detailed examples.
 
 ## Required Helpers
-
-See `home-intelligence/home-assistant/helpers.yaml`.
 
 At minimum:
 
@@ -94,8 +120,17 @@ At minimum:
 - `input_text.home_intelligence_status`
 - `input_text.home_intelligence_structured_json`
 
+Use [`home-assistant/helpers.yaml`](home-assistant/helpers.yaml) as a starting point.
+
+## More Documentation
+
+- [`docs/configuration.md`](docs/configuration.md): configuration reference.
+- [`docs/triggers.md`](docs/triggers.md): trigger design and examples.
+- [`examples/explicit-triggers.apps.yaml`](examples/explicit-triggers.apps.yaml): explicit trigger configuration.
+
 ## Notes
 
 - Magic Areas is optional. If it is not installed, the app falls back to direct entity discovery.
 - The app does not require cloud AI.
-- Notifications are optional and only used for `ACTION` or `URGENT` events.
+- Notifications are optional.
+- Entity IDs in the examples are placeholders. Replace them with entities from your own Home Assistant instance.
