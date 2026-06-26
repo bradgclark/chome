@@ -6,8 +6,7 @@ CHOME is a public collection of practical Home Assistant, AppDaemon, and Shelly 
 
 | Area | Path | What it is for |
 | --- | --- | --- |
-| Home Intelligence | [`home-intelligence/`](home-intelligence/) | Portable AppDaemon app that turns noisy Home Assistant state changes into a concise household activity feed. |
-| AppDaemon package | [`appdaemon/home-intelligence/`](appdaemon/home-intelligence/) | Ready-to-copy AppDaemon files for the Home Intelligence app. |
+| Home Intelligence | [`appdaemon/home-intelligence/`](appdaemon/home-intelligence/) | Portable AppDaemon app, docs, examples, and Home Assistant helper definitions. |
 | Home Assistant snippets | [`homeassistant/`](homeassistant/) | Lovelace cards, scripts, and template examples for Home Assistant. |
 | Shelly scripts | [`shelly/`](shelly/) | Shelly Gen2 JavaScript and matching Home Assistant automation examples for resilient smart-bulb switch behavior. |
 
@@ -15,9 +14,9 @@ CHOME is a public collection of practical Home Assistant, AppDaemon, and Shelly 
 
 If you want the AppDaemon Home Intelligence app:
 
-1. Open [`home-intelligence/README.md`](home-intelligence/README.md).
+1. Open [`appdaemon/home-intelligence/README.md`](appdaemon/home-intelligence/README.md).
 2. Copy the files from [`appdaemon/home-intelligence/`](appdaemon/home-intelligence/) into your AppDaemon config.
-3. Create the helpers from [`home-intelligence/home-assistant/helpers.yaml`](home-intelligence/home-assistant/helpers.yaml).
+3. Create the helpers from [`appdaemon/home-intelligence/home-assistant/helpers.yaml`](appdaemon/home-intelligence/home-assistant/helpers.yaml).
 4. Configure the entities, people, notification services, and optional Magic Areas settings for your home.
 
 If you want the smaller examples:
@@ -30,13 +29,12 @@ If you want the smaller examples:
 
 ```text
 appdaemon/
-  home-intelligence/        AppDaemon app and example apps.yaml
-
-home-intelligence/
-  README.md                 Install guide for the portable Home Intelligence app
-  docs/                     Configuration and trigger guidance
-  examples/                 Example AppDaemon configurations
-  home-assistant/           Home Assistant helper definitions
+  home-intelligence/        AppDaemon app, docs, examples, and helpers
+    README.md               Install guide for the portable Home Intelligence app
+    apps/                   AppDaemon app and apps.yaml example
+    docs/                   Configuration and trigger guidance
+    examples/               Example AppDaemon configurations
+    home-assistant/         Home Assistant helper definitions
 
 homeassistant/
   automation/               Automation examples
@@ -66,12 +64,12 @@ Most files are examples, not full private configuration exports. They are intend
 
 ## Documentation
 
-- [`home-intelligence/README.md`](home-intelligence/README.md): Home Intelligence install guide.
-- [`home-intelligence/docs/configuration.md`](home-intelligence/docs/configuration.md): Home Intelligence configuration reference.
-- [`home-intelligence/docs/triggers.md`](home-intelligence/docs/triggers.md): Trigger strategy and examples.
-- [`home-intelligence/docs/notifications.md`](home-intelligence/docs/notifications.md): Home Intelligence severity and notification hierarchy.
-- [`home-intelligence/docs/dashboard.md`](home-intelligence/docs/dashboard.md): Dashboard setup for the Home Intelligence summary.
-- [`home-intelligence/docs/context-and-ble.md`](home-intelligence/docs/context-and-ble.md): Magic Areas and Bermuda BLE context.
+- [`appdaemon/home-intelligence/README.md`](appdaemon/home-intelligence/README.md): Home Intelligence install guide.
+- [`appdaemon/home-intelligence/docs/configuration.md`](appdaemon/home-intelligence/docs/configuration.md): Home Intelligence configuration reference.
+- [`appdaemon/home-intelligence/docs/triggers.md`](appdaemon/home-intelligence/docs/triggers.md): Trigger strategy and examples.
+- [`appdaemon/home-intelligence/docs/notifications.md`](appdaemon/home-intelligence/docs/notifications.md): Home Intelligence severity and notification hierarchy.
+- [`appdaemon/home-intelligence/docs/dashboard.md`](appdaemon/home-intelligence/docs/dashboard.md): Dashboard setup for the Home Intelligence summary.
+- [`appdaemon/home-intelligence/docs/context-and-ble.md`](appdaemon/home-intelligence/docs/context-and-ble.md): Magic Areas and Bermuda BLE context.
 - [`docs/home-assistant.md`](docs/home-assistant.md): Home Assistant snippet guide.
 - [`docs/shelly.md`](docs/shelly.md): Shelly script guide.
 - [`docs/shelly-wall-switch-sync.md`](docs/shelly-wall-switch-sync.md): Detached wall switch light sync automation.
