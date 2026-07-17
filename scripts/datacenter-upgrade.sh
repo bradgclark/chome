@@ -6,7 +6,7 @@
 set -Eeuo pipefail
 shopt -s inherit_errexit
 
-readonly SCRIPT_VERSION="1.1.2"
+readonly SCRIPT_VERSION="1.1.3"
 readonly NODES=(pve1 pve2 pve3)
 readonly BACKUP_ROOT="/mnt/pve/truenas-backups/dump"
 readonly DEFAULT_BACKUP_MAX_AGE_HOURS=36
@@ -87,7 +87,15 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-if [[ ! " ${NODES[*]} " =~ " ${CURRENT_NODE} " ]]; then
+node_known=false
+for node in "${NODES[@]}"; do
+  if [[ "$node" == "$CURRENT_NODE" ]]; then
+    node_known=true
+    break
+  fi
+done
+
+if ! $node_known; then
   printf 'Run this script on pve1, pve2, or pve3. Current host: %s\n' "$CURRENT_NODE" >&2
   exit 1
 fi
@@ -121,6 +129,8 @@ node_run() {
   if [[ "$node" == "$CURRENT_NODE" ]]; then
     "$@"
   else
+    # The command is intentionally quoted locally before the remote shell receives it.
+    # shellcheck disable=SC2029
     ssh "${SSH_OPTIONS[@]}" "root@$node" "$(quote_command "$@")"
   fi
 }
@@ -211,6 +221,8 @@ preflight_node() {
   info "Preflight: $node"
   node_run "$node" pveversion -v >/dev/null || return 1
   node_run "$node" test -d /etc/pve || return 1
+  # Expansion is intentionally deferred to the selected Proxmox host.
+  # shellcheck disable=SC2016
   node_run "$node" bash -lc 'test "$(df -P / | awk "NR==2 {print \$5}" | tr -d % )" -lt 90' || return 1
   if node_run "$node" bash -lc 'systemctl list-units --state=failed --no-legend --plain | grep -q .'; then
     node_run "$node" systemctl --failed --no-pager || true
@@ -414,6 +426,8 @@ windows_vm_update() {
   info "QEMU $vmid ($name) on $node: Windows Update"
   $APPLY && env_value=1
   ps="$(windows_update_script)"
+  # $env is PowerShell syntax and must remain literal in Bash.
+  # shellcheck disable=SC2016
   printf -v ps '$env:CHOME_APPLY = '\''%s'\''\n%s' "$env_value" "$ps"
   encoded="$(iconv -f UTF-8 -t UTF-16LE <<<"$ps" | base64 -w0)"
   output="$(qga_exec "$node" "$vmid" 10800 powershell.exe -NoProfile -NonInteractive -EncodedCommand "$encoded")" || return 1
@@ -598,6 +612,8 @@ EOF
 frigate_update() {
   local node="$1" vmid="$2"
   if $APPLY; then
+    # Expansion is intentionally deferred to the Frigate container shell.
+    # shellcheck disable=SC2016
     node_run "$node" pct exec "$vmid" -- bash -lc 'set -Eeuo pipefail; cd /opt/frigate; docker compose pull; docker compose up -d --remove-orphans; for _ in $(seq 1 90); do health=$(docker inspect frigate --format "{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}" 2>/dev/null || true); [[ "$health" == healthy ]] && break; sleep 5; done; [[ "$health" == healthy ]]; curl -fsS http://127.0.0.1:5000/api/version; docker inspect frigate --format "health={{.State.Health.Status}} oom={{.State.OOMKilled}} restarts={{.RestartCount}}"' || return 1
   else
     node_run "$node" pct exec "$vmid" -- bash -lc 'curl -fsS http://127.0.0.1:5000/api/version; docker inspect frigate --format "image={{.Config.Image}} health={{.State.Health.Status}} oom={{.State.OOMKilled}} restarts={{.RestartCount}}"' || return 1
@@ -716,6 +732,8 @@ host_package_update() {
 
 host_needs_reboot() {
   local node="$1"
+  # Expansion is intentionally deferred to the selected Proxmox host.
+  # shellcheck disable=SC2016
   node_run "$node" bash -lc 'test -e /var/run/reboot-required || { running=$(uname -r); newest=$(dpkg -l "proxmox-kernel-*-pve-signed" 2>/dev/null | awk '\''$1 == "ii" {name=$2; sub(/^proxmox-kernel-/, "", name); sub(/-signed$/, "", name); print name}'\'' | sort -V | tail -n1); test -n "$newest" && test "$running" != "$newest"; }'
 }
 
