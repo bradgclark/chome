@@ -1,16 +1,17 @@
 # Uptime Kuma
 
-Uptime Kuma runs in Proxmox LXC `10118` on `pve2`.
+Uptime Kuma runs in a Proxmox LXC (example: CT `<vmid>` on `<node>`).
 
 ## Service details
 
 - Hostname: `uptime-kuma`
-- Address: `192.168.4.18`
-- Web interface: `http://uptime.chome.casa:3001`
-- Direct address: `http://192.168.4.18:3001`
+- Address: `<lxc-ip>`
+- Web interface: `http://uptime.example.lan:3001`
+- Direct address: `http://<lxc-ip>:3001`
 - Deployment directory: `/opt/uptime-kuma`
 - Persistent data: `/opt/uptime-kuma/data`
 - Container image: `louislam/uptime-kuma:2`
+- Bind address: set `UPTIME_KUMA_BIND_IP` (in a `.env` beside `compose.yaml`) to the LXC's LAN IP; it defaults to `127.0.0.1`, so the UI is not exposed until you choose an interface.
 
 ## Operations
 
