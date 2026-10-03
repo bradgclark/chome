@@ -54,9 +54,9 @@ A single guarded Bash script that updates the 3-node `chome` Proxmox cluster (`p
 - Per-application update functions (`omada_update`, `nextcloud_update`, `ollama_update`, `frigate_update`, `haos_update`) are dispatched by hardcoded Proxmox `vmid` in `upgrade_apps`/`upgrade_guests`. `generic_app_update` is the fallback for any LXC exposing `/usr/bin/update`. `APP_MIN_MEMORY_MB` gates memory-sensitive app containers before upgrading.
 - Inline `# shellcheck disable=SC...` comments with a one-line justification are the established pattern for intentional shellcheck exceptions (e.g. deferred remote-shell expansion) — keep using that pattern rather than disabling checks file-wide.
 
-## Verification (there is no CI or test suite)
+## Verification
 
-This repo has no package manager, build step, or automated test suite. Verify changes with the tooling that matches the file type instead:
+There is no package manager, build step or test suite. CI (`.github/workflows/checks.yml`) runs `sh scripts/check-public.sh` (fails on private IPs, email addresses and, when the `PRIVATE_PATTERNS` Actions variable is set, this household's own names and domains), ShellCheck on `scripts/*.sh`, and a Python syntax check. Run `sh scripts/check-public.sh` before every push. In cloud sessions the SessionStart hook installs ShellCheck. Otherwise verify with the tooling that matches the file type:
 
 - **Bash** (`scripts/*.sh`): `bash -n <file>` for a syntax check at minimum; run `shellcheck <file>` if it's available locally — the script is written to be shellcheck-clean, with explicit disable comments where an exception is intentional.
 - **Python** (`appdaemon/home-intelligence/apps/home_intelligence.py`): `python3 -m py_compile <file>` for a syntax check. There's no AppDaemon test harness in this repo, so logic changes to the trigger/triage flow should be reasoned through by hand against `docs/triggers.md` and `docs/notifications.md`.

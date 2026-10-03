@@ -1,0 +1,15 @@
+# Personal Claude Code files (never committed)
+CLAUDE.local.md
+.claude/settings.local.json
+
+# Secrets: this repo is public. Real values live outside it (see infrastructure/uptime-kuma/README.md).
+.env
+.env.*
+secrets.yaml
+*.pem
+*.key
+
+# Python / OS
+__pycache__/
+*.py[cod]
+.DS_Store
