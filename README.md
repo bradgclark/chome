@@ -73,3 +73,7 @@ Most files are examples, not full private configuration exports. They are intend
 - [`docs/home-assistant.md`](docs/home-assistant.md): Home Assistant snippet guide.
 - [`docs/shelly.md`](docs/shelly.md): Shelly script guide.
 - [`docs/shelly-wall-switch-sync.md`](docs/shelly-wall-switch-sync.md): Detached wall switch light sync automation.
+
+## License
+
+MIT. See [`LICENSE`](LICENSE).
