@@ -12,7 +12,7 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Public-content guard
         env:
           # Set under Settings > Secrets and variables > Actions > Variables.
