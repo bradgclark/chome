@@ -1,0 +1,25 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Public-content guard
+        env:
+          # Set under Settings > Secrets and variables > Actions > Variables.
+          # Kept out of the repo on purpose: it lists the household's own names.
+          PRIVATE_PATTERNS: ${{ vars.PRIVATE_PATTERNS }}
+        run: sh scripts/check-public.sh
+      - name: ShellCheck
+        run: shellcheck scripts/*.sh
+      - name: Python syntax
+        run: find . -name '*.py' -not -path './.git/*' -print0 | xargs -0 python3 -m py_compile
