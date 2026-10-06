@@ -4,7 +4,7 @@ Suggested GitHub metadata for `bradgclark/chome`.
 
 ## Description
 
-Public Home Assistant, AppDaemon, and Shelly examples from the Clark smart home, including a portable Home Intelligence AppDaemon package.
+Public Home Assistant, AppDaemon, and Shelly examples from a real smart home, including a portable Home Intelligence AppDaemon package.
 
 ## Topics
 
